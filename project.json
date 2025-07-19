@@ -1,0 +1,11 @@
+{
+  "project_name": "github.com/bushubdegefu/m-playground",
+  "app_names": [
+    "django-auth"
+  ],
+  "current_app_name": "",
+  "back_tick": "`",
+  "auth_app_name": "django-auth",
+  "auth_app_type": "standalone",
+  "models": null
+}

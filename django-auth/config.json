@@ -1,0 +1,141 @@
+{
+    "project_name": "github.com/bushubdegefu/m-playground",
+    "app_name": "django-auth",
+    "models": [
+      {
+        "name": "User",
+         "search_fields": ["username","email","first_name","last_name"],
+        "rln_model": [
+          "Permission$mtm$user_permissions",
+          "Group$mtm$user_groups"
+        ],
+        "fields": [
+          {
+            "name": "ID",
+            "type": " primitive.ObjectID",
+            "annotation": "bson:\"_id,omitzero\" json:\"id,omitzero\"",
+            "curd_flag": "true$false$false$false$false$false"
+          },
+          {
+            "name": "Password",
+            "type": "string",
+            "annotation": "bson:\"password,omitzero\" json:\"password,omitzero\"",
+            "curd_flag": "false$true$true$true$false$false"
+          },
+          {
+            "name": "LastLogin",
+            "type": "time.Time",
+            "annotation": "bson:\"last_login,omitzero\"  json:\"last_login,omitzero\"",
+            "curd_flag": "true$false$false$false$false$false"
+          },
+          {
+            "name": "IsSuperuser",
+            "type": "bool",
+            "annotation": "bson:\"is_superuser,omitzero\" json:\"is_superuser\"",
+            "curd_flag": "true$true$true$true$false$false"
+          },
+          {
+            "name": "Username",
+            "type": "string",
+            "annotation": "bson:\"username,omitzero\" json:\"username,omitzero\"",
+            "curd_flag": "true$true$true$true$false$false"
+          },
+          {
+            "name": "FirstName",
+            "type": "string",
+            "annotation": "bson:\"first_name,omitzero\" json:\"first_name\"",
+            "curd_flag": "true$true$true$false$true$false"
+          },
+          {
+            "name": "LastName",
+            "type": "string",
+            "annotation": "bson:\"last_name,omitzero\" json:\"last_name\"",
+            "curd_flag": "true$true$true$false$true$false"
+          },
+          {
+            "name": "Email",
+            "type": "string",
+            "annotation": "bson:\"email,omitzero\" json:\"email,omitzero\"",
+            "curd_flag": "true$true$true$true$false$false"
+          },
+          {
+            "name": "IsStaff",
+            "type": "bool",
+            "annotation": "bson:\"is_staff,omitzero\" json:\"is_staff\"",
+            "curd_flag": "true$true$true$true$false$false"
+          },
+          {
+            "name": "IsActive",
+            "type": "bool",
+            "annotation": "bson:\"is_active,omitzero\" json:\"is_active\"",
+            "curd_flag": "true$true$true$true$false$false"
+          },
+          {
+            "name": "GroupIDs",
+            "type": "[]primitive.ObjectID",
+            "annotation": "bson:\"group_ids,omitempty\"    json:\"group_ids,omitzero\"",
+            "curd_flag": "false$false$false$true$false$true"
+          },
+          {
+            "name": "PermissionIDs",
+            "type": "[]primitive.ObjectID",
+            "annotation": "bson:\"permission_ids,omitempty\" json:\"permission_ids,omitempty\"",
+            "curd_flag": "false$false$false$false$false$true"
+          }
+        ]
+      },
+      {
+        "name": "Group",
+         "search_fields": ["name"],
+        "rln_model": [
+          "Permission$mtm$user_permissions"
+            ],
+        "fields": [
+          {
+            "name": "ID",
+            "type": " primitive.ObjectID",
+            "annotation": "bson:\"_id,omitzero\" json:\"id,omitzero\"",
+            "curd_flag": "true$false$false$false$false$false"
+          },
+          {
+            "name": "Name",
+            "type": "string",
+            "annotation": "bson:\"name,omitzero\" json:\"name,omitzero\"",
+            "curd_flag": "true$true$true$true$false$false"
+          },
+          {
+            "name": "PermissionIDs",
+            "type": "[]primitive.ObjectID",
+            "annotation": "bson:\"permission_ids,omitzero\" json:\"permission_ids,omitzero\"",
+            "curd_flag": "true$false$false$false$false$true"
+          }
+
+        ]
+      },
+       {
+        "name": "Permission",
+         "search_fields": ["name","codename"],
+        "rln_model": [],
+        "fields": [
+          {
+            "name": "ID",
+            "type": " primitive.ObjectID",
+            "annotation": "bson:\"_id,omitzero\" json:\"id,omitzero\"",
+            "curd_flag": "true$false$false$false$false$false"
+          },
+          {
+            "name": "Name",
+            "type": "string",
+            "annotation": "bson:\"name,omitzero\" json:\"name,omitzero\"",
+            "curd_flag": "false$true$true$true$false$false"
+          },
+          {
+            "name": "Codename",
+            "type": "time.Time",
+            "annotation": "bson:\"codename,omitzero\" json:\"codename,omitzero\"",
+            "curd_flag": "true$false$false$false$false$false"
+          }
+        ]
+      }
+    ]
+  }
