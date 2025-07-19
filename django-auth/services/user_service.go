@@ -57,7 +57,7 @@ func (s *UserService) withTransaction(ctx context.Context, fn func(sc mongo.Sess
 
 // Create inserts a new user
 func (s *UserService) Create(ctx context.Context, posted_user *models.UserPost) (*models.UserGet, error) {
-	var createdUser models.UserGet
+	var createdUser = new(models.UserGet)
 
 	err := s.withTransaction(ctx, func(sc mongo.SessionContext) error {
 		hashedPassword := models.HashFunc(posted_user.Password)
@@ -80,16 +80,25 @@ func (s *UserService) Create(ctx context.Context, posted_user *models.UserPost) 
 			return fmt.Errorf("insert failed: %w", err)
 		}
 
-		copier.Copy(createdUser, user)
+		// copier.Copy(createdUser, user)
+		err = copier.CopyWithOption(createdUser, user, copier.Option{DeepCopy: true})
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
 
-	return &createdUser, err
+	return createdUser, err
 }
 
 // GetOne fetches a user by ID
 func (s *UserService) GetOne(ctx context.Context, id string) (*models.UserGet, error) {
+	// checking Cache if it exists
+	cacheKey := "user:" + id
+	if cachedUser, found := AppCacheService.Get(cacheKey); found {
+		return cachedUser.(*models.UserGet), nil
+	}
 
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -101,6 +110,9 @@ func (s *UserService) GetOne(ctx context.Context, id string) (*models.UserGet, e
 	if err != nil {
 		return nil, err
 	}
+
+	// Setting Cache before returning the user
+	AppCacheService.Set(cacheKey, &user)
 
 	return &user, nil
 }
@@ -196,6 +208,10 @@ func (s *UserService) Update(ctx context.Context, patch_user *models.UserPatch, 
 			return fmt.Errorf("insert failed: %w", err)
 		}
 
+		// Removing Cache if update sucess
+		cacheKey := "user:" + id
+		AppCacheService.Delete(cacheKey)
+
 		return nil
 	})
 
@@ -220,6 +236,10 @@ func (s *UserService) Delete(ctx context.Context, id string) error {
 		if result.DeletedCount == 0 {
 			return errors.New("no document deleted")
 		}
+
+		// Removing Cache if delete sucess
+		cacheKey := "user:" + id
+		AppCacheService.Delete(cacheKey)
 
 		return nil
 	})

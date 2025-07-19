@@ -57,7 +57,7 @@ func (s *GroupService) withTransaction(ctx context.Context, fn func(sc mongo.Ses
 
 // Create inserts a new group
 func (s *GroupService) Create(ctx context.Context, posted_group *models.GroupPost) (*models.GroupGet, error) {
-	var createdGroup models.GroupGet
+	var createdGroup = new(models.GroupGet)
 
 	err := s.withTransaction(ctx, func(sc mongo.SessionContext) error {
 
@@ -72,16 +72,25 @@ func (s *GroupService) Create(ctx context.Context, posted_group *models.GroupPos
 			return fmt.Errorf("insert failed: %w", err)
 		}
 
-		copier.Copy(createdGroup, group)
+		// copier.Copy(createdUser, user)
+		err = copier.CopyWithOption(createdGroup, group, copier.Option{DeepCopy: true})
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
 
-	return &createdGroup, err
+	return createdGroup, err
 }
 
 // GetOne fetches a group by ID
 func (s *GroupService) GetOne(ctx context.Context, id string) (*models.GroupGet, error) {
+	// checking Cache if it exists
+	cacheKey := "group:" + id
+	if cachedGroup, found := AppCacheService.Get(cacheKey); found {
+		return cachedGroup.(*models.GroupGet), nil
+	}
 
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -93,6 +102,9 @@ func (s *GroupService) GetOne(ctx context.Context, id string) (*models.GroupGet,
 	if err != nil {
 		return nil, err
 	}
+
+	// Setting Cache before returning the user
+	AppCacheService.Set(cacheKey, &group)
 
 	return &group, nil
 }
@@ -165,6 +177,10 @@ func (s *GroupService) Update(ctx context.Context, patch_group *models.GroupPatc
 			return fmt.Errorf("insert failed: %w", err)
 		}
 
+		// Removing Cache if update sucess
+		cacheKey := "group:" + id
+		AppCacheService.Delete(cacheKey)
+
 		return nil
 	})
 
@@ -189,6 +205,10 @@ func (s *GroupService) Delete(ctx context.Context, id string) error {
 		if result.DeletedCount == 0 {
 			return errors.New("no document deleted")
 		}
+
+		// Removing Cache if delete sucess
+		cacheKey := "group:" + id
+		AppCacheService.Delete(cacheKey)
 
 		return nil
 	})

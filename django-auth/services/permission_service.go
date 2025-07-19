@@ -57,7 +57,7 @@ func (s *PermissionService) withTransaction(ctx context.Context, fn func(sc mong
 
 // Create inserts a new permission
 func (s *PermissionService) Create(ctx context.Context, posted_permission *models.PermissionPost) (*models.PermissionGet, error) {
-	var createdPermission models.PermissionGet
+	var createdPermission = new(models.PermissionGet)
 
 	err := s.withTransaction(ctx, func(sc mongo.SessionContext) error {
 
@@ -72,16 +72,25 @@ func (s *PermissionService) Create(ctx context.Context, posted_permission *model
 			return fmt.Errorf("insert failed: %w", err)
 		}
 
-		copier.Copy(createdPermission, permission)
+		// copier.Copy(createdUser, user)
+		err = copier.CopyWithOption(createdPermission, permission, copier.Option{DeepCopy: true})
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
 
-	return &createdPermission, err
+	return createdPermission, err
 }
 
 // GetOne fetches a permission by ID
 func (s *PermissionService) GetOne(ctx context.Context, id string) (*models.PermissionGet, error) {
+	// checking Cache if it exists
+	cacheKey := "permission:" + id
+	if cachedPermission, found := AppCacheService.Get(cacheKey); found {
+		return cachedPermission.(*models.PermissionGet), nil
+	}
 
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -93,6 +102,9 @@ func (s *PermissionService) GetOne(ctx context.Context, id string) (*models.Perm
 	if err != nil {
 		return nil, err
 	}
+
+	// Setting Cache before returning the user
+	AppCacheService.Set(cacheKey, &permission)
 
 	return &permission, nil
 }
@@ -165,6 +177,10 @@ func (s *PermissionService) Update(ctx context.Context, patch_permission *models
 			return fmt.Errorf("insert failed: %w", err)
 		}
 
+		// Removing Cache if update sucess
+		cacheKey := "permission:" + id
+		AppCacheService.Delete(cacheKey)
+
 		return nil
 	})
 
@@ -189,6 +205,10 @@ func (s *PermissionService) Delete(ctx context.Context, id string) error {
 		if result.DeletedCount == 0 {
 			return errors.New("no document deleted")
 		}
+
+		// Removing Cache if delete sucess
+		cacheKey := "permission:" + id
+		AppCacheService.Delete(cacheKey)
 
 		return nil
 	})

@@ -1,16 +1,21 @@
 package services
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"github.com/bushubdegefu/m-playground/cache"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+var AppCacheService *cache.CacheService
 
 func InitServices(client *mongo.Client) {
+	var err error
+	AppCacheService, err = cache.NewCacheService()
+	if err != nil {
+		panic("Unable to initialize cache service")
+	}
+
 	// Initialize services here
 	NewUserService(client)
-	NewUserService(client)
-	NewUserService(client)
 	NewGroupService(client)
-	NewGroupService(client)
-	NewGroupService(client)
-	NewPermissionService(client)
-	NewPermissionService(client)
 	NewPermissionService(client)
 }
